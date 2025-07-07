@@ -21,23 +21,27 @@ export default function App() {
     }
 
     function deleteNote(noteId) {
-      setNotes((oldNotes)=> oldNotes.filter((oldNote)=> oldNote.id != noteId))
+      setNotes((oldNotes)=> oldNotes.filter((oldNote)=> oldNote.id !== noteId))
     }
 
     function updateNote(text) {
-        setNotes(oldNotes => oldNotes.map(oldNote => {
-          return oldNote.id === currentNoteId
-            ? { ...oldNote, body: text }
-              : oldNote
-        })
+      setNotes(oldNotes => {
+        const updatedNotes = oldNotes.map(note =>
+          note.id === currentNoteId
+          ? { ...note, body: text } : note
         );
 
-        // re arrange the notes array for most recent to be at the top
-        const currentNoteIndex = notes.findIndex((note)=> note.id === currentNoteId);
-        let temp = notes[0];
-        notes[0] = notes[currentNoteIndex];
-        notes[currentNoteIndex] = temp;
+      const currentNote = updatedNotes.find(note => note.id === currentNoteId);
+
+      // filter out the current note and move it on the top
+      const rearranged = [
+        currentNote,
+        ...updatedNotes.filter(note => note.id !== currentNoteId)
+      ];
+      return rearranged;
+      });
     }
+
     // localStorage.clear();
     // use effect to handle local storage when notes state changes
     useEffect(()=>{localStorage.setItem("notes",JSON.stringify(notes));},[notes]);
