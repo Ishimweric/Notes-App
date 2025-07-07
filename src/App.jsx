@@ -19,13 +19,19 @@ export default function App() {
         setNotes(prevNotes => [newNote, ...prevNotes])
         setCurrentNoteId(newNote.id)
     }
-    
     function updateNote(text) {
         setNotes(oldNotes => oldNotes.map(oldNote => {
           return oldNote.id === currentNoteId
             ? { ...oldNote, body: text }
               : oldNote
-        }))
+        })
+        );
+
+        // re arrange the notes array for most recent to be at the top
+        const currentNoteIndex = notes.findIndex((note)=> note.id === currentNoteId);
+        let temp = notes[0];
+        notes[0] = notes[currentNoteIndex];
+        notes[currentNoteIndex] = temp;
     }
     // localStorage.clear();
     // use effect to handle local storage when notes state changes
