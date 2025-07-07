@@ -2,18 +2,20 @@ import React, { useEffect } from "react"
 import Sidebar from "./components/Sidebar"
 import Editor from "./components/Editor"
 import Split from "react-split"
-import { addDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore"
+import { addDoc, deleteDoc, doc, onSnapshot, setDoc } from "firebase/firestore"
 import { notesCollection, db } from "./firebase/firebase"
+import { setFlavor } from "showdown"
 
 export default function App() {
     const [notes, setNotes] = React.useState([])
-    const [currentNoteId, setCurrentNoteId] = React.useState(
-        (notes[0] && notes[0].id) || ""
-    )
+    const [currentNoteId, setCurrentNoteId] = React.useState("")
+    const sortedNotes = notes.sort((a,b)=>b.updatedAt - a.updatedAt)
     
     async function createNewNote() {
         const newNote = {
-            body: "# Type your markdown note's title here"
+            body: "# Type your markdown note's title here",
+            createdAt: Date.now(),
+            updatedAt: Date.now()
         }
         const newNoteRef = await addDoc(notesCollection,newNote);
         setCurrentNoteId(newNoteRef.id)
@@ -24,26 +26,18 @@ export default function App() {
       await deleteDoc(docRef);
     }
 
-    function updateNote(text) {
-      setNotes(oldNotes => {
-        const updatedNotes = oldNotes.map(note =>
-          note.id === currentNoteId
-          ? { ...note, body: text } : note
-        );
-
-      const currentNote = updatedNotes.find(note => note.id === currentNoteId);
-
-      // filter out the current note and move it on the top
-      const rearranged = [
-        currentNote,
-        ...updatedNotes.filter(note => note.id !== currentNoteId)
-      ];
-      return rearranged;
-      });
+    async function updateNote(text) {
+      const docRef = doc(db, "notes", currentNoteId);
+      await setDoc(docRef, {body: text, updatedAt: Date.now()}, {merge: true})
     }
 
-    // localStorage.clear();
-    // use effect to handle local storage when notes state changes
+    useEffect(()=>{
+      if(!currentNoteId){
+        setCurrentNoteId(notes[0]?.id)
+      }
+    },[notes])
+
+    // use effect to handle firebase storage when notes state changes
     useEffect(()=>{
       const unsubscribe = onSnapshot(notesCollection, (snapshot)=>{
         const notesArray = snapshot.docs.map((doc)=>({
@@ -69,20 +63,17 @@ export default function App() {
                 className="split"
             >
                 <Sidebar
-                    notes={notes}
-                    currentNote={currentNote}
-                    setCurrentNoteId={setCurrentNoteId}
-                    newNote={createNewNote}
-                    deleteNote = {deleteNote}
+                  notes={sortedNotes}
+                  currentNote={currentNote}
+                  setCurrentNoteId={setCurrentNoteId}
+                  newNote={createNewNote}
+                  deleteNote = {deleteNote}
                 />
-                {
-                    currentNoteId && 
-                    notes.length > 0 &&
-                    <Editor 
-                        currentNote={currentNote} 
-                        updateNote={updateNote} 
-                    />
-                }
+                
+                <Editor 
+                  currentNote={currentNote} 
+                  updateNote={updateNote} 
+                />
             </Split>
             :
             <div className="no-notes">
