@@ -1,20 +1,12 @@
-import React from "react"
+import React, { useEffect } from "react"
 import Sidebar from "./components/Sidebar"
 import Editor from "./components/Editor"
 import { notesdata } from "./data/notesdata"
 import Split from "react-split"
 import {nanoid} from "nanoid"
 
-/**
- * Challenge: Spend 10-20+ minutes reading through the code
- * and trying to understand how it's currently working. Spend
- * as much time as you need to feel confident that you 
- * understand the existing code (although you don't need
- * to fully understand everything to move on)
- */
-
 export default function App() {
-    const [notes, setNotes] = React.useState([])
+    const [notes, setNotes] = React.useState(JSON.parse(localStorage.getItem("notes"))|| [])
     const [currentNoteId, setCurrentNoteId] = React.useState(
         (notes[0] && notes[0].id) || ""
     )
@@ -30,11 +22,14 @@ export default function App() {
     
     function updateNote(text) {
         setNotes(oldNotes => oldNotes.map(oldNote => {
-            return oldNote.id === currentNoteId
-                ? { ...oldNote, body: text }
-                : oldNote
+          return oldNote.id === currentNoteId
+            ? { ...oldNote, body: text }
+              : oldNote
         }))
     }
+    // localStorage.clear();
+    // use effect to handle local storage when notes state changes
+    useEffect(()=>{localStorage.setItem("notes",JSON.stringify(notes));},[notes]);
     
     function findCurrentNote() {
         return notes.find(note => {
