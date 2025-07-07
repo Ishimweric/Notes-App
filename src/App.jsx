@@ -1,7 +1,6 @@
 import React, { useEffect } from "react"
 import Sidebar from "./components/Sidebar"
 import Editor from "./components/Editor"
-import { notesdata } from "./data/notesdata"
 import Split from "react-split"
 import {nanoid} from "nanoid"
 
