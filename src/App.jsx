@@ -3,6 +3,8 @@ import Sidebar from "./components/Sidebar"
 import Editor from "./components/Editor"
 import Split from "react-split"
 import {nanoid} from "nanoid"
+import { onSnapshot } from "firebase/firestore"
+import { notesCollection } from "./firebase/firebase"
 
 export default function App() {
     const [notes, setNotes] = React.useState(()=>JSON.parse(localStorage.getItem("notes"))|| [])
@@ -43,7 +45,17 @@ export default function App() {
 
     // localStorage.clear();
     // use effect to handle local storage when notes state changes
-    useEffect(()=>{localStorage.setItem("notes",JSON.stringify(notes));},[notes]);
+    useEffect(()=>{
+      const unsubscribe = onSnapshot(notesCollection, (snapshot)=>{
+        const notesArray = snapshot.docs.map((doc)=>({
+          ...doc.data(),
+          id: doc.id
+        }))
+        setNotes(notesArray);
+      })
+      return unsubscribe},
+      []
+    );
 
     const currentNote = notes.find(note =>  note.id === currentNoteId) || notes[0];
     
