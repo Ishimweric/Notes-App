@@ -4,7 +4,7 @@ import {collection, getFirestore} from "firebase/firestore"
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCftnPC7jAaTqYHkHmsP_S6Sn4s0F5WIYs",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "notes-app-384e8.firebaseapp.com",
   projectId: "notes-app-384e8",
   storageBucket: "notes-app-384e8.firebasestorage.app",
