@@ -19,6 +19,11 @@ export default function App() {
         setNotes(prevNotes => [newNote, ...prevNotes])
         setCurrentNoteId(newNote.id)
     }
+
+    function deleteNote(noteId) {
+      setNotes((oldNotes)=> oldNotes.filter((oldNote)=> oldNote.id != noteId))
+    }
+
     function updateNote(text) {
         setNotes(oldNotes => oldNotes.map(oldNote => {
           return oldNote.id === currentNoteId
@@ -58,6 +63,7 @@ export default function App() {
                     currentNote={findCurrentNote()}
                     setCurrentNoteId={setCurrentNoteId}
                     newNote={createNewNote}
+                    deleteNote = {deleteNote}
                 />
                 {
                     currentNoteId && 
