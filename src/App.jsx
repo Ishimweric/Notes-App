@@ -7,8 +7,9 @@ import { notesCollection, db } from "./firebase/firebase"
 import { setFlavor } from "showdown"
 
 export default function App() {
-    const [notes, setNotes] = React.useState([])
-    const [currentNoteId, setCurrentNoteId] = React.useState("")
+    const [notes, setNotes] = React.useState([]);
+    const [currentNoteId, setCurrentNoteId] = React.useState("");
+    const [tempNoteText, setTempNoteText] = React.useState("");
     const sortedNotes = notes.sort((a,b)=>b.updatedAt - a.updatedAt)
     
     async function createNewNote() {
@@ -31,11 +32,28 @@ export default function App() {
       await setDoc(docRef, {body: text, updatedAt: Date.now()}, {merge: true})
     }
 
+    const currentNote = notes.find(note =>  note.id === currentNoteId) || notes[0];
+
+    useEffect(()=>{
+      if(currentNote){
+        setTempNoteText(currentNote.body)
+      }
+    },[currentNote]);
+
+    useEffect(()=>{
+      const timeOutId = setTimeout(() => {
+        if (tempNoteText !== currentNote.body){
+          updateNote(tempNoteText)
+        }
+      }, 500);
+      return ()=> clearTimeout(timeOutId)
+    },[tempNoteText])
+
     useEffect(()=>{
       if(!currentNoteId){
         setCurrentNoteId(notes[0]?.id)
       }
-    },[notes])
+    },[notes]);
 
     // use effect to handle firebase storage when notes state changes
     useEffect(()=>{
@@ -49,8 +67,6 @@ export default function App() {
       return unsubscribe},
       []
     );
-
-    const currentNote = notes.find(note =>  note.id === currentNoteId) || notes[0];
     
     return (
         <main>
@@ -71,8 +87,8 @@ export default function App() {
                 />
                 
                 <Editor 
-                  currentNote={currentNote} 
-                  updateNote={updateNote} 
+                  tempNoteText={tempNoteText} 
+                  setTempNoteText={setTempNoteText}
                 />
             </Split>
             :
